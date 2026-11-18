@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mardel 2027 · Alojamientos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --azul:#1B4C9C;      /* lona de carpa */
+    --azul-osc:#12346B;
+    --amarillo:#F4C531;  /* carpa amarilla */
+    --arena:#F1E9D8;
+    --tinta:#14213A;
+    --gris:#5B6475;
+    --linea:#DCD3C0;
+    --blanco:#FFFFFF;
+    --rojo:#B0342A;
+    --verde:#1F7A4D;
+  }
+  *{box-sizing:border-box}
+  html{color-scheme:light}
+  body{margin:0;background:var(--blanco);color:var(--tinta);font:16px/1.55 Archivo,system-ui,sans-serif;font-variation-settings:"wdth" 100}
+  img{display:block;max-width:100%}
+  a{color:var(--azul)}
+  :focus-visible{outline:3px solid var(--amarillo);outline-offset:2px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+  /* hero */
+  .hero{position:relative;min-height:min(72vh,600px);display:flex;align-items:flex-end;overflow:hidden;background:#3d6f86}
+  .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,33,58,.15) 0%,rgba(20,33,58,0) 40%,rgba(20,33,58,.45) 100%)}
+  .hero .wrap{position:relative;z-index:1;width:100%;padding-bottom:36px}
+  .hero h1{margin:0;color:#fff;font-weight:900;font-variation-settings:"wdth" 62;font-size:min(150px,calc((100vw - 48px) / 7.2));line-height:.9;white-space:nowrap;letter-spacing:-.005em;text-shadow:0 2px 24px rgba(20,33,58,.35)}
+
+  /* franja de carpa */
+  .carpa{height:26px;background:repeating-linear-gradient(90deg,var(--azul) 0 34px,var(--blanco) 34px 68px);border-bottom:6px solid var(--amarillo)}
+
+  /* barra de controles */
+  .bar{position:sticky;top:0;z-index:20;background:var(--blanco);border-bottom:1px solid var(--linea)}
+  .bar .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;padding-top:12px;padding-bottom:12px}
+  .ctrl{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--gris)}
+  .seg{display:flex;border:2px solid var(--azul);border-radius:999px;overflow:hidden}
+  .seg button{appearance:none;border:0;background:var(--blanco);color:var(--azul);padding:7px 14px;font:600 14px Archivo,sans-serif;cursor:pointer}
+  .seg button+button{border-left:2px solid var(--azul)}
+  .seg button.on{background:var(--azul);color:var(--blanco)}
+  .stepper{display:flex;align-items:center;border:2px solid var(--azul);border-radius:999px;overflow:hidden}
+  .stepper button{appearance:none;border:0;width:36px;height:34px;background:var(--azul);color:var(--blanco);font:700 20px/1 Archivo,sans-serif;cursor:pointer;display:grid;place-items:center}
+  .stepper button:hover{background:var(--azul-osc)}
+  .stepper output{min-width:40px;text-align:center;font-weight:700;color:var(--tinta);font-size:16px}
+
+  h2{font-weight:900;font-variation-settings:"wdth" 75;font-size:clamp(34px,5vw,52px);line-height:1;margin:56px 0 10px}
+  .lead{color:var(--gris);margin:0 0 20px;max-width:70ch}
+
+  /* tabla */
+  .tablewrap{overflow:auto;border:2px solid var(--tinta);border-radius:6px}
+  table{width:100%;border-collapse:collapse;min-width:820px;font-size:15px}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--linea);white-space:nowrap}
+  th{background:var(--arena);font-weight:700;font-size:14px}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#F7F3EA}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-variant-numeric:tabular-nums;text-align:right}
+  th.num{text-align:right}
+  .nd{color:var(--gris)}
+  .tag-new{display:inline-block;margin-left:8px;font-size:12px;font-weight:700;background:var(--amarillo);color:var(--tinta);padding:1px 7px;border-radius:4px;vertical-align:1px}
+
+  /* tarjetas */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:28px 24px}
+  .card{display:flex;flex-direction:column;border-top:6px solid var(--azul);background:var(--blanco);scroll-margin-top:80px}
+  .card.flash{outline:3px solid var(--amarillo);outline-offset:4px}
+  .gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:3px;aspect-ratio:16/10;background:var(--arena)}
+  .gallery img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+  .gallery img:first-child{grid-row:1 / span 2}
+  .body{padding:16px 2px 4px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .title{margin:0;font-weight:800;font-variation-settings:"wdth" 85;font-size:24px;line-height:1.1}
+  .num-id{font-weight:900;font-variation-settings:"wdth" 70;font-size:30px;color:var(--azul);line-height:1}
+  .zone{color:var(--gris);font-size:14px;margin-top:-6px}
+  .prices{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--tinta);border-radius:6px;overflow:hidden}
+  .prices div{padding:9px 12px}
+  .prices div+div{border-left:2px solid var(--tinta);background:var(--amarillo)}
+  .prices small{display:block;font-size:13px;color:var(--tinta);opacity:.8}
+  .prices strong{font-weight:800;font-variation-settings:"wdth" 80;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.1}
+  .prices .na{font-size:17px;font-weight:700}
+  .fine{font-size:13px;color:var(--gris);margin-top:-4px}
+  .move{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px;align-items:baseline}
+  .move span{white-space:nowrap}
+  .move b{font-weight:800;font-variation-settings:"wdth" 80;font-size:20px;color:var(--azul)}
+  .move a{margin-left:auto;align-self:center}
+  .facts{display:flex;flex-wrap:wrap;gap:6px}
+  .facts span{font-size:13px;padding:3px 9px;border-radius:4px;background:var(--arena)}
+  .facts .rule{background:#E3F0E8;color:var(--verde);font-weight:600}
+  .rating{font-size:14px;font-weight:600}
+  .notes{margin:0;padding:0;list-style:none;font-size:14.5px;display:flex;flex-direction:column;gap:4px}
+  .notes li{padding-left:18px;position:relative}
+  .notes li::before{position:absolute;left:0;font-weight:800}
+  .notes .p::before{content:"+";color:var(--verde)}
+  .notes .c::before{content:"–";color:var(--rojo)}
+  .vote{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:10px 0 2px;border-top:1px dashed var(--linea);margin-top:auto}
+  .vbtn{appearance:none;border:2px solid var(--azul);background:var(--blanco);color:var(--azul);font:700 15px Archivo,sans-serif;padding:7px 14px;border-radius:999px;cursor:pointer}
+  .vbtn.on{background:var(--amarillo);border-color:var(--tinta);color:var(--tinta)}
+  .vbtn:disabled{opacity:.45;cursor:not-allowed}
+  .vcount{font-size:14px}.vcount b{font-size:18px;font-weight:800}
+  .vnames{flex-basis:100%;font-size:13px;color:var(--gris)}
+  .votemsg{margin:0 0 20px;font-weight:600;color:var(--azul)}
+  .who{margin:0 0 10px;font-size:15px}
+  .who input{font:16px Archivo,sans-serif;padding:7px 12px;border:2px solid var(--azul);border-radius:999px;width:180px}
+  .who label{font-weight:700;margin-right:6px}
+  .linkbtn{appearance:none;border:0;background:none;color:var(--azul);text-decoration:underline;font:inherit;cursor:pointer;padding:0}
+  .cta{padding-top:6px}
+  .cta a{display:block;text-align:center;text-decoration:none;background:var(--azul);color:#fff;padding:12px;border-radius:6px;font-weight:700}
+  .cta a:hover{background:var(--azul-osc)}
+
+  /* postales */
+  .postales{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:12px;margin-top:8px}
+  .postales figure{margin:0;position:relative}
+  .postales img{width:100%;height:100%;object-fit:cover;aspect-ratio:auto;min-height:220px;border-radius:4px}
+  .postales figcaption{font-size:13px;color:var(--gris);margin-top:6px}
+  .postales figcaption b{color:var(--tinta)}
+  @media (max-width:720px){.postales{grid-template-columns:1fr 1fr}.postales figure:first-child{grid-row:span 2}}
+
+  .descartes{columns:2 320px;column-gap:32px;margin:0;padding:0;list-style:none;font-size:14.5px}
+  .descartes li{break-inside:avoid;padding:8px 0;border-bottom:1px solid var(--linea)}
+  .descartes b{display:block}
+  .descartes span{color:var(--gris)}
+
+  .method{margin:56px 0 0;padding:22px 0 0;border-top:2px solid var(--tinta);color:var(--gris);font-size:14.5px;max-width:80ch}
+  .method p{margin:0 0 10px}
+  .method b{color:var(--tinta)}
+  footer{padding:30px 0 50px;color:var(--gris);font-size:13px}
+
+  .lb{position:fixed;inset:0;background:rgba(10,20,40,.9);display:none;place-items:center;z-index:50;cursor:zoom-out;padding:20px}
+  .lb.on{display:grid}
+  .lb img{max-width:100%;max-height:90vh;border-radius:6px}
+  @media (max-width:640px){.bar{position:static}.hero{min-height:380px}}
+  @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <img src="img/hero.jpg" alt="Atardecer sobre la costa de Mar del Plata">
+  <div class="wrap"><h1>MDQ RBO 2027</h1></div>
+</section>
+<div class="carpa" role="presentation"></div>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="ctrl">Fechas
+      <div class="seg" id="dates">
+        <button data-k="vie" class="on">Vie 15 a lun 18</button>
+        <button data-k="jue">Jue 14 a dom 17</button>
+      </div>
+    </div>
+    <div class="ctrl">Somos
+      <div class="stepper"><button id="minus" aria-label="Uno menos">−</button><output id="ppl">8</output><button id="plus" aria-label="Uno más">+</button></div>
+    </div>
+    <div class="ctrl">Ordenar por
+      <div class="seg" id="sort">
+        <button data-k="votes">Más votadas</button><button data-k="pp" class="on">Precio</button>
+        <button data-k="car">Cercanía a Mr. Jones</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <h2>De un vistazo</h2>
+  <p class="lead">Tocá una fila para ir a la casa. Precios totales en dólares por las 3 noches, con todas las tarifas de Airbnb incluidas.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Alojamiento</th><th>Zona</th><th>Dorm. / camas / baños</th><th class="num">Auto a Mr. Jones</th><th class="num">Total</th><th class="num">Por cabeza</th><th>Reseñas</th><th class="num">Votos</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table></div>
+
+  <h2>Las casas</h2>
+  <p class="lead">Todas son lugares enteros, sin compartir con nadie, y ninguna dice que no acepta grupos de jóvenes. Poné tu nombre y votá todas las que te gusten. Podés cambiar tu voto cuando quieras.</p>
+  <div class="who" id="who"></div>
+  <p class="votemsg" id="voteMsg">Cargando votos…</p>
+  <div class="grid" id="grid"></div>
+
+  <div class="method">
+    <p><b>Precios.</b> Total de las 3 noches para 8 adultos, en dólares, como figuraba en cada aviso el 18/11/2026. Pueden cambiar hasta que se reserve. “No disponible” quiere decir que la casa no se puede reservar en esas fechas.</p>
+    <p><b>Cercanía a Mr. Jones.</b> Minutos en auto y a pie según Google Maps, desde el punto del mapa de cada aviso hasta Jones MDP (Playa Grande). En enero, con tráfico, el auto puede tardar más. Airbnb corre unas cuadras el pin para no mostrar la dirección exacta, así que es aproximado.</p>
+    <p><b>Reglas.</b> Se revisó la descripción y las normas de cada aviso. Ninguna de las que quedaron dice que no acepta grupos de jóvenes, pero casi todas prohíben fiestas. Conviene confirmarlo con el anfitrión antes de reservar.</p>
+  </div>
+  <footer>Hecho para el viaje a Mardel. Actualizado el 18/11/2026.</footer>
+</main>
+<div class="lb" id="lb"><img alt=""></div>
+
+<script>
+const JONES = "-38.0265521,-57.531791";
+const A = id => `https://www.airbnb.com.ar/rooms/${id}?adults=8&check_in=2027-01-15&check_out=2027-01-18`;
+const DATA = [
+  { id:1, title:"Chalet para 10 en Punta Mogotes", zone:"Punta Mogotes, Colinas de Peralta Ramos", url:A("1604249398866407851"),
+    beds:"4 / 10 / 3", geo:"-38.0527,-57.555", car:12, walk:56, rating:"Sin reseñas, publicación nueva",
+    price:{vie:1157, jue:1157}, fine:"Cancelación gratis hasta 2 días antes.",
+    facts:["Casa entera","Hasta 10","Parrilla","Cochera cubierta","Galería","Lavadero"],
+    notes:[["p","La más cómoda para 8: 4 dormitorios y 3 baños"],["p","Cocina muy equipada"],["c","Lejos de Mr. Jones: Uber sí o sí"]] },
+  { id:2, title:"Depto 3 ambientes frente al mar", zone:"Punta Iglesia, Bristol (centro)", url:A("1610887892272193460"),
+    beds:"2 / 5 / 2", geo:"-38.00046,-57.54064", car:11, walk:56, rating:"Sin reseñas",
+    price:{vie:613, jue:555}, fine:"De jueves a domingo sale 58 dólares menos.",
+    facts:["Depto entero","Hasta 8","Frente al mar","Wi-Fi"],
+    notes:[["p","Barata y con vista directa al mar"],["c","8 en 2 dormitorios y 5 camas: muy apretados"],["c","Hay que llevar sábanas y toallas"]] },
+  { id:3, title:"Para 8 jóvenes, a 30 m del mar", zone:"Centro, cerca de Santa Fe al 1200", url:A("14448592"),
+    beds:"3 / 6 / 1", geo:"-37.99662,-57.54234", car:11, walk:62, rating:"5,0 con 2 reseñas",
+    price:{vie:1183, jue:1183}, fine:"Ya tiene un descuento aplicado (antes 1.303 dólares).",
+    facts:["Depto entero","Hasta 8","Vista al mar","Estacionamiento","Acepta jóvenes"],
+    notes:[["p","Pensado para grupos de jóvenes"],["c","Un solo baño para 8"],["c","Sábanas y toallas aparte"]] },
+  { id:4, title:"Casa Varese, chalet amplio", zone:"Playa Varese, cerca de Gascón al 800", url:A("1755829014231539496"),
+    beds:"3–4 / 4–8 / 2–3", geo:"-38.0146,-57.5346", car:5, walk:26, rating:"Sin reseñas, publicación nueva",
+    price:{vie:1288, jue:1288}, fine:"Mismo precio en las dos fechas.",
+    facts:["Casa entera","Hasta 10","Acepta grupos de jóvenes","Se puede fumar"],
+    notes:[["p","A Mr. Jones se va caminando (26 min)"],["p","Cerca de Güemes y Alem"],["c","El aviso se contradice en dormitorios y camas: preguntar"]] },
+  { id:6, title:"Casa para amigos con parrilla", zone:"Playa Grande, cerca de Gral. Roca al 900", url:A("1814856283995998972"),
+    beds:"3 / 6 / 2", geo:"-38.02075,-57.54073", car:6, walk:20, rating:"Sin reseñas (anfitriona: 4,5 con 8)",
+    price:{vie:1963, jue:1963}, fine:"Mismo precio en las dos fechas.",
+    facts:["Casa entera","Hasta 10","Parrilla","Hogar","Jardín"],
+    notes:[["p","La más cerca de Mr. Jones: 20 min a pie"],["c","La más cara"],["c","Sábanas y toallas no incluidas"]] },
+
+  { id:9, isNew:true, title:"Casa “Linda” en Punta Mogotes", zone:"Punta Mogotes, 8 cuadras de la playa", url:A("1367040724760627050"),
+    beds:"3 / 10 / 2", geo:"-38.0552,-57.5539", car:11, walk:61, rating:"Sin reseñas, publicación nueva",
+    price:{vie:1686, jue:1686}, fine:"Mismo precio en las dos fechas.",
+    facts:["Casa entera","Hasta 10","Parrilla","Hogar","Aire acondicionado","Estacionamiento"],
+    notes:[["p","Una cama para cada uno (10 camas)"],["p","Patio con comedor afuera y parrilla"],["c","Cara para lo que es"]] },
+  { id:10, isNew:true, title:"Casa con pileta climatizada", zone:"Zona norte, Constitución, 4 cuadras de la playa", url:A("1618267279843958700"),
+    beds:"3 / 4 / 4", geo:"-37.96415,-57.54792", car:20, walk:117, rating:"5,0 con 2 reseñas",
+    price:{vie:1844, jue:1844}, fine:"Mismo precio en las dos fechas.",
+    facts:["Casa entera","Hasta 8","Pileta climatizada","Quincho con parrilla","4 baños","Garage"],
+    notes:[["p","La más linda de todas, con pileta y quincho"],["p","4 baños: nadie hace fila"],["c","Solo 4 camas para 8: preguntar cómo duermen"],["c","Lejos de Mr. Jones (20 min en auto)"]] },
+  { id:12, isNew:true, title:"Casa a 100 m de la playa", zone:"Zona sur, Acantilados", url:A("1350977699211746851"),
+    beds:"4 / 5 / 2", geo:"-38.1182,-57.5954", car:23, walk:175, rating:"4,38 con 8 reseñas",
+    price:{vie:542, jue:null}, fine:"Solo está libre de viernes a lunes.",
+    facts:["Casa entera","Hasta 8","Balcón con vista al mar","Quincho y parrilla","Horno de barro","Aire acondicionado"],
+    notes:[["p","La más barata de todas, con vista al mar"],["c","Camas para 8 justas (una persona en el living)"],["c","Muy lejos de Mr. Jones (23 min en auto)"]] },
+];
+DATA.forEach((d,i)=>{d.n=i+1;d.photos=[1,2,3].map(k=>`img/${d.id}-${k}.jpg`);});
+
+const state = {dates:"vie", ppl:8, sort:"pp"};
+const usd = n => "US$ " + Math.round(n).toLocaleString("es-AR");
+const mapUrl = d => `https://www.google.com/maps/dir/${d.geo}/${JONES}`;
+const walkTxt = m => m>=60 ? `${Math.floor(m/60)} h ${m%60} min` : `${m} min`;
+
+/* votos compartidos (Netlify) */
+const API="/api/votes";
+let me=null, canVote=false, votes={}, saving=false;
+try{ me=localStorage.getItem("mdq-nombre"); }catch(e){}
+const myPicks = () => (me && votes[me]) || [];
+const voters = id => Object.keys(votes).filter(u => (votes[u]||[]).includes(id));
+const msg = t => { document.getElementById("voteMsg").textContent = t; };
+function fillNames(){
+  document.querySelectorAll("[data-names]").forEach(el=>{
+    el.textContent = voters(+el.dataset.names).map(u=> u===me ? "vos" : u).join(", ");
+  });
+}
+function whoUI(){
+  const box=document.getElementById("who");
+  if(me){
+    box.innerHTML='Votás como <b></b>. <button type="button" class="linkbtn" id="changeName">Cambiar</button>';
+    box.querySelector("b").textContent=me;
+    document.getElementById("changeName").onclick=()=>{me=null;try{localStorage.removeItem("mdq-nombre")}catch(e){};whoUI();render();};
+  }else{
+    box.innerHTML='<form id="nameForm"><label for="nameIn">¿Quién sos?</label> <input id="nameIn" maxlength="30" placeholder="Tu nombre" autocomplete="given-name"> <button class="vbtn">Listo</button></form>';
+    document.getElementById("nameForm").onsubmit=e=>{e.preventDefault();const v=document.getElementById("nameIn").value.trim();if(!v)return;me=v.slice(0,30);try{localStorage.setItem("mdq-nombre",me)}catch(e){};whoUI();render();};
+  }
+  canVote=!!me && loaded;
+}
+let loaded=false;
+async function load(){
+  try{
+    const r=await fetch(API,{cache:"no-store"}); if(!r.ok) throw 0;
+    votes=await r.json(); loaded=true; canVote=!!me;
+    const n=Object.values(votes).filter(a=>a.length).length;
+    msg(n ? `Ya votaron ${n} de 8.` : "Todavía no votó nadie. Arrancá vos.");
+  }catch(e){ if(!loaded) msg("No se pudieron cargar los votos. Probá recargar en un rato."); }
+  if(!saving) render();
+}
+async function toggleVote(id){
+  if(!me){ msg("Primero poné tu nombre."); document.getElementById("nameIn")?.focus(); return; }
+  if(!loaded || saving) return;
+  const cur=myPicks(); const next= cur.includes(id) ? cur.filter(x=>x!==id) : [...cur,id];
+  votes={...votes,[me]:next}; render();
+  saving=true;
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:me,picks:next})});
+    if(!r.ok) throw 0;
+  }catch(e){ msg("No se pudo guardar tu voto. Probá de nuevo."); }
+  finally{ saving=false; load(); }
+}
+whoUI(); load(); setInterval(load,15000);
+
+function render(){
+  const list = DATA.map(d=>{const t=d.price[state.dates];return {...d,total:t,pp:t==null?null:t/state.ppl}});
+  list.sort((x,y)=>{
+    if(state.sort==="car") return x.car-y.car || x.n-y.n;
+    if(state.sort==="votes"){const v=voters(y.id).length-voters(x.id).length; if(v) return v;}
+    if(x.pp==null && y.pp==null) return x.n-y.n;
+    if(x.pp==null) return 1; if(y.pp==null) return -1;
+    return x.pp-y.pp;
+  });
+  const nd='<span class="nd">No disponible</span>';
+  document.getElementById("tbody").innerHTML = list.map(d=>`
+    <tr data-id="${d.id}" tabindex="0"><td>${d.n}</td><td><b>${d.title}</b>${d.isNew?'<span class="tag-new">Nueva</span>':''}</td><td>${d.zone.split(",")[0]}</td><td>${d.beds}</td>
+    <td class="num">${d.car} min</td><td class="num">${d.total!=null?usd(d.total):nd}</td><td class="num">${d.pp!=null?usd(d.pp):"—"}</td><td>${d.rating.split(",")[0].replace(" con"," ·")}</td><td class="num"><b>${voters(d.id).length||""}</b></td></tr>`).join("");
+
+  document.getElementById("grid").innerHTML = list.map(d=>`
+    <article class="card" id="op-${d.id}">
+      <div class="gallery">${d.photos.map((p,i)=>`<img src="${p}" alt="${d.title}, foto ${i+1}" loading="lazy">`).join("")}</div>
+      <div class="body">
+        <div class="top"><h3 class="title">${d.title}${d.isNew?'<span class="tag-new">Nueva</span>':''}</h3><span class="num-id">${d.n}</span></div>
+        <div class="zone">${d.zone}</div>
+        <div class="prices">
+          <div><small>Total 3 noches</small>${d.total!=null?`<strong>${usd(d.total)}</strong>`:'<span class="na">No disponible</span>'}</div>
+          <div><small>Cada uno (${state.ppl})</small>${d.pp!=null?`<strong>${usd(d.pp)}</strong>`:'<span class="na">—</span>'}</div>
+        </div>
+        <div class="fine">${d.fine}</div>
+        <div class="move"><span><b>${d.car} min</b> en auto</span><span><b>${walkTxt(d.walk)}</b> a pie</span><a href="${mapUrl(d)}" target="_blank" rel="noopener">Ver ruta</a></div>
+        <div class="facts"><span><b>${d.beds}</b> dorm./camas/baños</span>${d.facts.map(f=>`<span class="${/jóvenes/.test(f)?"rule":""}">${f}</span>`).join("")}</div>
+        <div class="rating">★ ${d.rating}</div>
+        <ul class="notes">${d.notes.map(([t,n])=>`<li class="${t}">${n}</li>`).join("")}</ul>
+        <div class="vote">
+          <button class="vbtn ${myPicks().includes(d.id)?"on":""}" data-vote="${d.id}" ${loaded?"":"disabled"} aria-pressed="${myPicks().includes(d.id)}">${myPicks().includes(d.id)?"★ La voté":"☆ Votar"}</button>
+          <span class="vcount"><b>${voters(d.id).length}</b> ${voters(d.id).length===1?"voto":"votos"}</span>
+          <span class="vnames" data-names="${d.id}"></span>
+        </div>
+        <div class="cta"><a href="${d.url}" target="_blank" rel="noopener">Ver en Airbnb</a></div>
+      </div></article>`).join("");
+
+  document.querySelectorAll("#tbody tr").forEach(tr=>{
+    const go=()=>{const el=document.getElementById("op-"+tr.dataset.id);el.scrollIntoView({block:"start"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1400);};
+    tr.onclick=go; tr.onkeydown=e=>{if(e.key==="Enter")go();};
+  });
+  document.querySelectorAll("[data-vote]").forEach(b=>b.onclick=()=>toggleVote(+b.dataset.vote));
+  fillNames();
+  document.querySelectorAll(".gallery img").forEach(im=>im.onclick=()=>{
+    const lb=document.getElementById("lb"); lb.querySelector("img").src=im.src; lb.classList.add("on");
+  });
+}
+document.getElementById("lb").onclick=e=>e.currentTarget.classList.remove("on");
+function seg(id,key){
+  document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); state[key]=b.dataset.k; render();
+  });
+}
+seg("dates","dates"); seg("sort","sort");
+const pplEl=document.getElementById("ppl");
+document.getElementById("minus").onclick=()=>{state.ppl=Math.max(1,state.ppl-1);pplEl.textContent=state.ppl;render();};
+document.getElementById("plus").onclick=()=>{state.ppl=Math.min(20,state.ppl+1);pplEl.textContent=state.ppl;render();};
+render();
+</script>
+</body>
+</html>

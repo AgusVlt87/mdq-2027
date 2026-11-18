@@ -1,0 +1,6 @@
+MDQ RBO 2027
+
+Página para elegir alojamiento en Mar del Plata (enero 2027) y votar entre amigos.
+- public/: la página y las fotos.
+- netlify/functions/votes.mjs: guarda los votos en Netlify Blobs (ruta /api/votes).
+Netlify publica sola cada cambio que se sube a la rama main.
