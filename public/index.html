@@ -149,6 +149,30 @@
   .lb.on{display:grid}
   .lb img{max-width:100%;max-height:90vh;border-radius:6px}
   @media (max-width:640px){.bar{position:static}.hero{min-height:380px}}
+
+  .gwrap{position:relative}
+  .gbadge{display:none}
+  @media (max-width:640px){
+    .hero .credit{position:static;display:block;text-align:right;padding:0 10px 6px;margin-top:-4px}
+    .hero{flex-direction:column;justify-content:flex-end;align-items:stretch;min-height:360px}
+    .bar .wrap{gap:10px 14px}
+    .ctrl{gap:8px}
+    .seg button{padding:7px 11px;font-size:13.5px}
+    table{min-width:0;font-size:14.5px}
+    th,td{padding:10px 10px;white-space:normal}
+    .hm{display:none}
+    td.num{white-space:nowrap}
+    .grid{grid-template-columns:1fr;gap:34px}
+    .gallery{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;aspect-ratio:16/10;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .gallery::-webkit-scrollbar{display:none}
+    .gallery img{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;cursor:default}
+    .gallery img:first-child{grid-row:auto}
+    .gbadge{display:block;position:absolute;right:10px;bottom:10px;background:rgba(20,33,58,.75);color:#fff;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;pointer-events:none}
+    .title{font-size:22px}
+    .prices strong{font-size:23px}
+    .who form{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    .who input{flex:1;min-width:0;width:auto}
+  }
   @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 </style>
 </head>
@@ -172,7 +196,7 @@
     <div class="ctrl">Somos
       <div class="stepper"><button id="minus" aria-label="Uno menos">−</button><output id="ppl">8</output><button id="plus" aria-label="Uno más">+</button></div>
     </div>
-    <div class="ctrl">Ordenar por
+    <div class="ctrl">Ordenar
       <div class="seg" id="sort">
         <button data-k="votes">Más votadas</button><button data-k="pp" class="on">Precio</button>
         <button data-k="car">Cercanía a Mr. Jones</button>
@@ -185,7 +209,7 @@
   <h2>De un vistazo</h2>
   <p class="lead">Tocá una fila para ir a la casa. Precios totales en dólares por las 3 noches, con todas las tarifas de Airbnb incluidas.</p>
   <div class="tablewrap"><table>
-    <thead><tr><th>#</th><th>Alojamiento</th><th>Zona</th><th>Dorm. / camas / baños</th><th class="num">Auto a Mr. Jones</th><th class="num">Total</th><th class="num">Por cabeza</th><th>Reseñas</th><th class="num">Votos</th></tr></thead>
+    <thead><tr><th>#</th><th>Alojamiento</th><th class="hm">Zona</th><th class="hm">Dorm. / camas / baños</th><th class="num hm">Auto a Mr. Jones</th><th class="num hm">Total</th><th class="num">Por cabeza</th><th class="hm">Reseñas</th><th class="num">Votos</th></tr></thead>
     <tbody id="tbody"></tbody>
   </table></div>
 
@@ -245,7 +269,8 @@ const DATA = [
     facts:["Casa entera","Hasta 8","Balcón con vista al mar","Quincho y parrilla","Horno de barro","Aire acondicionado"],
     notes:[["p","La más barata de todas, con vista al mar"],["c","Camas para 8 justas (una persona en el living)"],["c","Muy lejos de Mr. Jones (23 min en auto)"]] },
 ];
-DATA.forEach((d,i)=>{d.n=i+1;d.photos=[1,2,3].map(k=>`img/${d.id}-${k}.jpg`);});
+const PHOTOS={"1": ["https://a0.muscache.com/im/pictures/hosting/Hosting-1604249398866407851/original/d2a9d034-2f9b-4697-b4d7-09f407f10c01.png?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1604249398866407851/original/ad22934f-6e01-4045-88a5-a49c0d6c3448.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1604249398866407851/original/bd6451a8-5162-4f9b-bbf2-5453e6b80af0.jpeg?im_w=960"], "3": ["https://a0.muscache.com/im/pictures/miso/Hosting-14448592/original/675252ac-fb1b-4cd7-bf9a-951d297262a6.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/bb578192-64b0-4967-b580-e8c6228bf4e4.jpg?im_w=960", "https://a0.muscache.com/im/pictures/miso/Hosting-14448592/original/749b62e1-9f48-4cd2-bd4d-67e5c67d42e9.jpeg?im_w=960"], "4": ["https://a0.muscache.com/im/pictures/hosting/Hosting-1755829014231539496/original/a0b16989-81aa-400f-b7bd-5fa3171a41c6.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1755829014231539496/original/983834ba-7c9d-4a72-ab3d-0dd9222eac0f.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1755829014231539496/original/3dfe08b1-1d1d-46a3-b8d5-0a0451e2edf4.jpeg?im_w=960"], "6": ["https://a0.muscache.com/im/pictures/hosting/Hosting-1814856283995998972/original/3c6ee935-1198-4d04-958c-3ca608a9ba14.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1814856283995998972/original/3dcfc160-466d-4492-b046-b691efa43d01.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1814856283995998972/original/fd2f8182-cdda-441e-b478-b97b0843de0c.jpeg?im_w=960"], "9": ["https://a0.muscache.com/im/pictures/hosting/Hosting-1367040724760627050/original/82938b8a-e504-4cd3-963e-22e48f7f4eb9.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1367040724760627050/original/507ff8eb-0149-4b52-bd6e-bd11ed8ba381.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1367040724760627050/original/556a071f-1dfa-4d50-b010-e308f1610a88.jpeg?im_w=960"], "10": ["https://a0.muscache.com/im/pictures/hosting/Hosting-1618267279843958700/original/25cce3b0-d9b9-4af2-a013-efe8ed796fc4.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1618267279843958700/original/b188ff63-0cc9-4037-a1b8-6ec5473db9d8.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1618267279843958700/original/e910d3eb-6a90-4f50-b745-56fb0324ad06.jpeg?im_w=960"], "12": ["https://a0.muscache.com/im/pictures/hosting/Hosting-1350977699211746851/original/904c7050-58e3-44aa-ade2-2662353d83d2.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1350977699211746851/original/6d458c86-18f1-4a3b-ae88-e53eb62a0c33.jpeg?im_w=960", "https://a0.muscache.com/im/pictures/hosting/Hosting-1350977699211746851/original/9bd43987-9c76-4f5d-9dec-bf3e0436d74f.jpeg?im_w=960"]};
+DATA.forEach((d,i)=>{d.n=i+1;d.local=[1,2,3].map(k=>`img/${d.id}-${k}.jpg`);d.photos=PHOTOS[d.id]||d.local;});
 
 const state = {dates:"vie", ppl:8, sort:"pp"};
 const usd = n => "US$ " + Math.round(n).toLocaleString("es-AR");
@@ -311,12 +336,12 @@ function render(){
   });
   const nd='<span class="nd">No disponible</span>';
   document.getElementById("tbody").innerHTML = list.map(d=>`
-    <tr data-id="${d.id}" tabindex="0"><td>${d.n}</td><td><b>${d.title}</b>${d.isNew?'<span class="tag-new">Nueva</span>':''}</td><td>${d.zone.split(",")[0]}</td><td>${d.beds}</td>
-    <td class="num">${d.car} min</td><td class="num">${d.total!=null?usd(d.total):nd}</td><td class="num">${d.pp!=null?usd(d.pp):"—"}</td><td>${d.rating.split(",")[0].replace(" con"," ·")}</td><td class="num"><b>${voters(d.id).length||""}</b></td></tr>`).join("");
+    <tr data-id="${d.id}" tabindex="0"><td>${d.n}</td><td><b>${d.title}</b>${d.isNew?'<span class="tag-new">Nueva</span>':''}</td><td class="hm">${d.zone.split(",")[0]}</td><td class="hm">${d.beds}</td>
+    <td class="num hm">${d.car} min</td><td class="num hm">${d.total!=null?usd(d.total):nd}</td><td class="num">${d.pp!=null?usd(d.pp):"—"}</td><td class="hm">${d.rating.split(",")[0].replace(" con"," ·")}</td><td class="num"><b>${voters(d.id).length||""}</b></td></tr>`).join("");
 
   document.getElementById("grid").innerHTML = list.map(d=>`
     <article class="card" id="op-${d.id}">
-      <div class="gallery">${d.photos.map((p,i)=>`<img src="${p}" alt="${d.title}, foto ${i+1}" loading="lazy">`).join("")}</div>
+      <div class="gwrap"><div class="gallery">${d.photos.map((p,i)=>`<img src="${p}" alt="${d.title}, foto ${i+1}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${d.local[i]}'">`).join("")}</div><span class="gbadge">1 / ${d.photos.length}</span></div>
       <div class="body">
         <div class="top"><h3 class="title">${d.title}${d.isNew?'<span class="tag-new">Nueva</span>':''}</h3><span class="num-id">${d.n}</span></div>
         <div class="zone">${d.zone}</div>
@@ -341,6 +366,7 @@ function render(){
     const go=()=>{const el=document.getElementById("op-"+tr.dataset.id);el.scrollIntoView({block:"start"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1400);};
     tr.onclick=go; tr.onkeydown=e=>{if(e.key==="Enter")go();};
   });
+  document.querySelectorAll(".gallery").forEach(g=>{const bd=g.parentElement.querySelector(".gbadge");g.onscroll=()=>{const i=Math.round(g.scrollLeft/g.clientWidth)+1;bd.textContent=i+" / "+g.children.length;};});
   document.querySelectorAll("[data-vote]").forEach(b=>b.onclick=()=>toggleVote(+b.dataset.vote));
   fillNames();
   document.querySelectorAll(".gallery img").forEach(im=>im.onclick=()=>{
