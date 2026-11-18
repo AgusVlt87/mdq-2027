@@ -155,6 +155,19 @@
   .pin.jones{background:var(--amarillo);color:var(--tinta);width:40px;height:40px;font-size:20px}
   .leaflet-popup-content{font:14px/1.4 Archivo,sans-serif;margin:10px 14px}
   .leaflet-popup-content b{font-size:15px}
+  .status{border:2px solid var(--linea);border-radius:6px;padding:9px 11px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+  .strow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .st{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+  .st-sin{background:#ECEEF2;color:var(--gris)}
+  .st-env{background:#E2EAF7;color:var(--azul)}
+  .st-resp{background:#FDF1CC;color:#7A5A00}
+  .st-ok{background:#DDF0E5;color:var(--verde)}
+  .st-no{background:#F6DEDB;color:var(--rojo)}
+  .st-res{background:var(--verde);color:#fff}
+  .stnote{margin:0;color:var(--tinta)}
+  .stmeta{margin:0;font-size:12.5px;color:var(--gris)}
+  .status select,.status textarea{font:15px Archivo,sans-serif;padding:7px 10px;border:2px solid var(--azul);border-radius:6px;width:100%;background:#fff;color:var(--tinta)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .gwrap{position:relative}
   .gbadge{display:none}
   @media (max-width:640px){
@@ -216,12 +229,12 @@
   <h2>De un vistazo</h2>
   <p class="lead">Tocá una fila para ir a la casa. Precios totales en dólares por las 3 noches, con todas las tarifas de Airbnb incluidas.</p>
   <div class="tablewrap"><table>
-    <thead><tr><th>#</th><th>Alojamiento</th><th class="hm">Zona</th><th class="hm">Dorm. / camas / baños</th><th class="num hm">Auto a Mr. Jones</th><th class="num hm">Total</th><th class="num">Por cabeza</th><th class="hm">Reseñas</th><th class="num">Votos</th></tr></thead>
+    <thead><tr><th>#</th><th>Alojamiento</th><th class="hm">Zona</th><th class="hm">Dorm. / camas / baños</th><th class="num hm">Auto a Mr. Jones</th><th class="num hm">Total</th><th class="num">Por cabeza</th><th class="hm">Reseñas</th><th>Estado</th><th class="num">Votos</th></tr></thead>
     <tbody id="tbody"></tbody>
   </table></div>
 
   <h2>Las casas</h2>
-  <p class="lead">Todas son lugares enteros, sin compartir con nadie, y ninguna dice que no acepta grupos de jóvenes. Poné tu nombre y votá todas las que te gusten. Podés cambiar tu voto cuando quieras.</p>
+  <p class="lead">Todas son lugares enteros, sin compartir con nadie, y ninguna dice que no acepta grupos de jóvenes. Poné tu nombre y votá todas las que te gusten. Podés cambiar tu voto cuando quieras. Si le escribís a un anfitrión, actualizá el estado de esa casa así todos saben en qué quedó.</p>
   <div class="who" id="who"></div>
   <p class="votemsg" id="voteMsg">Cargando votos…</p>
   <div class="grid" id="grid"></div>
@@ -285,7 +298,15 @@ const walkTxt = m => m>=60 ? `${Math.floor(m/60)} h ${m%60} min` : `${m} min`;
 
 /* votos compartidos (Netlify) */
 const API="/api/votes";
-let me=null, canVote=false, votes={}, saving=false;
+let me=null, canVote=false, votes={}, saving=false, statusMap={}, editing=null;
+const ST={sin:["Sin contactar","st-sin"],enviado:["Mensaje enviado","st-env"],respondio:["Respondió","st-resp"],ok:["Confirmó que se puede","st-ok"],no:["No se puede","st-no"],reservada:["Reservada","st-res"]};
+const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<1)return"recién";if(m<60)return`hace ${m} min`;const h=Math.round(m/60);if(h<24)return`hace ${h} h`;const d=Math.round(h/24);return`hace ${d} ${d===1?"día":"días"}`;};
+const stOf=id=>statusMap[id]||{state:"sin",note:""};
+async function saveStatus(id,state,note){
+  const prev=statusMap[id]; statusMap={...statusMap,[id]:{state,note,by:me||"",at:Date.now()}}; editing=null; render();
+  try{const r=await fetch("/api/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,state,note,by:me||""})}); if(!r.ok) throw 0;}
+  catch(e){ statusMap={...statusMap,[id]:prev}; msg("No se pudo guardar el estado. Probá de nuevo."); render(); }
+}
 try{ me=localStorage.getItem("mdq-nombre"); }catch(e){}
 const myPicks = () => (me && votes[me]) || [];
 const voters = id => Object.keys(votes).filter(u => (votes[u]||[]).includes(id));
@@ -309,13 +330,14 @@ function whoUI(){
 }
 let loaded=false;
 async function load(){
+  try{ const rs=await fetch("/api/status",{cache:"no-store"}); if(rs.ok){ const v=await rs.json(); if(!editing) statusMap=v; } }catch(e){}
   try{
     const r=await fetch(API,{cache:"no-store"}); if(!r.ok) throw 0;
     votes=await r.json(); loaded=true; canVote=!!me;
     const n=Object.values(votes).filter(a=>a.length).length;
     msg(n ? `Ya votaron ${n}.` : "Todavía no votó nadie. Arrancá vos.");
   }catch(e){ if(!loaded) msg("No se pudieron cargar los votos. Probá recargar en un rato."); }
-  if(!saving) render();
+  if(!saving && !editing) render();
 }
 async function toggleVote(id){
   if(!me){ msg("Primero poné tu nombre."); document.getElementById("nameIn")?.focus(); return; }
@@ -371,7 +393,7 @@ function render(){
   const nd='<span class="nd">No disponible</span>';
   document.getElementById("tbody").innerHTML = list.map(d=>`
     <tr data-id="${d.id}" tabindex="0"><td>${d.n}</td><td><b>${d.title}</b>${d.isNew?'<span class="tag-new">Nueva</span>':''}</td><td class="hm">${d.zone.split(",")[0]}</td><td class="hm">${d.beds}</td>
-    <td class="num hm">${d.car} min</td><td class="num hm">${d.total!=null?usd(d.total):nd}</td><td class="num">${d.pp!=null?usd(d.pp):"—"}</td><td class="hm">${d.rating.split(",")[0].replace(" con"," ·")}</td><td class="num"><b>${voters(d.id).length||""}</b></td></tr>`).join("");
+    <td class="num hm">${d.car} min</td><td class="num hm">${d.total!=null?usd(d.total):nd}</td><td class="num">${d.pp!=null?usd(d.pp):"—"}</td><td class="hm">${d.rating.split(",")[0].replace(" con"," ·")}</td><td><span class="st ${ST[stOf(d.id).state][1]}">${ST[stOf(d.id).state][0]}</span></td><td class="num"><b>${voters(d.id).length||""}</b></td></tr>`).join("");
 
   document.getElementById("grid").innerHTML = list.map(d=>`
     <article class="card" id="op-${d.id}">
@@ -388,6 +410,15 @@ function render(){
         <div class="facts"><span><b>${d.beds}</b> dorm./camas/baños</span>${d.facts.map(f=>`<span class="${/jóvenes/.test(f)?"rule":""}">${f}</span>`).join("")}</div>
         <div class="rating">★ ${d.rating}</div>
         <ul class="notes">${d.notes.map(([t,n])=>`<li class="${t}">${n}</li>`).join("")}</ul>
+        <div class="status" data-st="${d.id}">${editing===d.id?`
+          <label class="sr" for="sel${d.id}">Estado</label>
+          <select id="sel${d.id}">${Object.entries(ST).map(([k,[t]])=>`<option value="${k}" ${stOf(d.id).state===k?"selected":""}>${t}</option>`).join("")}</select>
+          <textarea id="note${d.id}" maxlength="280" rows="2" placeholder="Nota (ej.: acepta 8 por 50 dólares más)"></textarea>
+          <div class="strow"><button class="vbtn on" data-save="${d.id}">Guardar</button><button class="linkbtn" data-cancel="${d.id}">Cancelar</button></div>`:`
+          <div class="strow"><span class="st ${ST[stOf(d.id).state][1]}">${ST[stOf(d.id).state][0]}</span><button class="linkbtn" data-edit="${d.id}">Cambiar estado</button></div>
+          ${stOf(d.id).note?`<p class="stnote"></p>`:""}
+          ${stOf(d.id).at?`<p class="stmeta">${stOf(d.id).by?"Lo actualizó ":"Actualizado "}<span class="stby"></span> ${ago(stOf(d.id).at)}</p>`:""}`}
+        </div>
         <div class="vote">
           <button class="vbtn ${myPicks().includes(d.id)?"on":""}" data-vote="${d.id}" ${loaded?"":"disabled"} aria-pressed="${myPicks().includes(d.id)}">${myPicks().includes(d.id)?"★ La voté":"☆ Votar"}</button>
           <span class="vcount"><b>${voters(d.id).length}</b> ${voters(d.id).length===1?"voto":"votos"}</span>
@@ -401,6 +432,13 @@ function render(){
     tr.onclick=go; tr.onkeydown=e=>{if(e.key==="Enter")go();};
   });
   document.querySelectorAll(".gallery").forEach(g=>{const bd=g.parentElement.querySelector(".gbadge");g.onscroll=()=>{const i=Math.round(g.scrollLeft/g.clientWidth)+1;bd.textContent=i+" / "+g.children.length;};});
+  document.querySelectorAll("[data-st]").forEach(el=>{const id=+el.dataset.st, st=stOf(id);
+    const n=el.querySelector(".stnote"); if(n) n.textContent=st.note;
+    const b=el.querySelector(".stby"); if(b) b.textContent=st.by||"";
+    const t=el.querySelector("textarea"); if(t) t.value=st.note||"";});
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{editing=+b.dataset.edit;render();document.getElementById("sel"+editing)?.focus();});
+  document.querySelectorAll("[data-cancel]").forEach(b=>b.onclick=()=>{editing=null;render();});
+  document.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>{const id=+b.dataset.save;saveStatus(id,document.getElementById("sel"+id).value,document.getElementById("note"+id).value.trim());});
   document.querySelectorAll("[data-vote]").forEach(b=>b.onclick=()=>toggleVote(+b.dataset.vote));
   fillNames();
   updatePopups();
