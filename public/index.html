@@ -30,10 +30,12 @@
 
   /* hero */
   .hero{position:relative;min-height:min(72vh,600px);display:flex;align-items:flex-end;overflow:hidden;background:#3d6f86}
-  .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%}
+  .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
   .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,33,58,.15) 0%,rgba(20,33,58,0) 40%,rgba(20,33,58,.45) 100%)}
   .hero .wrap{position:relative;z-index:1;width:100%;padding-bottom:36px}
   .hero h1{margin:0;color:#fff;font-weight:900;font-variation-settings:"wdth" 62;font-size:min(150px,calc((100vw - 48px) / 7.2));line-height:.9;white-space:nowrap;letter-spacing:-.005em;text-shadow:0 2px 24px rgba(20,33,58,.35)}
+
+  .hero .credit{position:absolute;right:10px;bottom:6px;z-index:1;font-size:11px;color:#fff;opacity:.7}
 
   /* franja de carpa */
   .carpa{height:26px;background:repeating-linear-gradient(90deg,var(--azul) 0 34px,var(--blanco) 34px 68px);border-bottom:6px solid var(--amarillo)}
@@ -142,8 +144,9 @@
 <body>
 
 <section class="hero">
-  <img src="img/hero.jpg" alt="Atardecer sobre la costa de Mar del Plata">
+  <img src="img/hero.jpg" alt="Vista aérea de la costa de Mar del Plata al atardecer">
   <div class="wrap"><h1>MDQ RBO 2027</h1></div>
+  <span class="credit">Foto: Fermín Rodríguez Penelas / Unsplash</span>
 </section>
 <div class="carpa" role="presentation"></div>
 
