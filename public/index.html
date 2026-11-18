@@ -199,11 +199,6 @@ const DATA = [
     price:{vie:1157, jue:1157}, fine:"Cancelación gratis hasta 2 días antes.",
     facts:["Casa entera","Hasta 10","Parrilla","Cochera cubierta","Galería","Lavadero"],
     notes:[["p","La más cómoda para 8: 4 dormitorios y 3 baños"],["p","Cocina muy equipada"],["c","Lejos de Mr. Jones: Uber sí o sí"]] },
-  { id:2, title:"Depto 3 ambientes frente al mar", zone:"Punta Iglesia, Bristol (centro)", url:A("1610887892272193460"),
-    beds:"2 / 5 / 2", geo:"-38.00046,-57.54064", car:11, walk:56, rating:"Sin reseñas",
-    price:{vie:613, jue:555}, fine:"De jueves a domingo sale 58 dólares menos.",
-    facts:["Depto entero","Hasta 8","Frente al mar","Wi-Fi"],
-    notes:[["p","Barata y con vista directa al mar"],["c","8 en 2 dormitorios y 5 camas: muy apretados"],["c","Hay que llevar sábanas y toallas"]] },
   { id:3, title:"Para 8 jóvenes, a 30 m del mar", zone:"Centro, cerca de Santa Fe al 1200", url:A("14448592"),
     beds:"3 / 6 / 1", geo:"-37.99662,-57.54234", car:11, walk:62, rating:"5,0 con 2 reseñas",
     price:{vie:1183, jue:1183}, fine:"Ya tiene un descuento aplicado (antes 1.303 dólares).",
@@ -273,7 +268,7 @@ async function load(){
     const r=await fetch(API,{cache:"no-store"}); if(!r.ok) throw 0;
     votes=await r.json(); loaded=true; canVote=!!me;
     const n=Object.values(votes).filter(a=>a.length).length;
-    msg(n ? `Ya votaron ${n} de 8.` : "Todavía no votó nadie. Arrancá vos.");
+    msg(n ? `Ya votaron ${n}.` : "Todavía no votó nadie. Arrancá vos.");
   }catch(e){ if(!loaded) msg("No se pudieron cargar los votos. Probá recargar en un rato."); }
   if(!saving) render();
 }
